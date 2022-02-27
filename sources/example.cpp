@@ -2,8 +2,7 @@
 
 #include <example.hpp>
 
-
-auto start = std::chrono::high_resolution_clock::now();//*****
+auto start = std::chrono::high_resolution_clock::now();  //*****
 //------------------------------------------------------------------------------
 
 struct Request {
@@ -15,14 +14,15 @@ struct Field {
 };
 std::vector<Field> unhandled;
 struct Response {
-  std::vector<std::pair<int , std::string>> suggestions;
+  std::vector<std::pair<int, std::string>> suggestions;
 };
 
 void fail(beast::error_code ec, char const* what) {
   std::cerr << what << ": " << ec.message() << "\n";
 }
 
-void update_information_in_storage(std::vector<Field> updateData ,std::string file){
+void update_information_in_storage(std::vector<Field> updateData,
+                                   std::string file) {
   std::fstream data;
   data.open(file);
   if (data.eof()) {
@@ -35,15 +35,17 @@ void update_information_in_storage(std::vector<Field> updateData ,std::string fi
   tmp << data.rdbuf();
   data.close();
   fileData = tmp.str();
-  fileData = fileData.substr(0,fileData.size()-3);
+  fileData = fileData.substr(0, fileData.size() - 3);
   std::stringstream filess;
-  filess << fileData <<"," << std::endl;
-  std::cout<< "edited" << fileData << std::endl;
-  for (size_t i = 0; i < updateData.size();i ++)  {
-    json field = json{{"id",updateData[i].text},{"name",updateData[i].text},{"cost",updateData[i].cost}};
+  filess << fileData << "," << std::endl;
+  std::cout << "edited" << fileData << std::endl;
+  for (size_t i = 0; i < updateData.size(); i++) {
+    json field = json{{"id", updateData[i].text},
+                      {"name", updateData[i].text},
+                      {"cost", updateData[i].cost}};
     filess << field;
-    if (i != updateData.size()-1) {
-      filess << ","<< std::endl;
+    if (i != updateData.size() - 1) {
+      filess << "," << std::endl;
     } else {
       filess << std::endl;
     }
@@ -55,8 +57,6 @@ void update_information_in_storage(std::vector<Field> updateData ,std::string fi
   return;
 }
 
-
-
 std::string search_in_storage(std::string input, json data) {
   Response resp;
   bool check;
@@ -64,7 +64,7 @@ std::string search_in_storage(std::string input, json data) {
     json elem = el.value();
     if (elem.at("id") == input) {
       check = true;
-      std::pair<int,std::string> field;
+      std::pair<int, std::string> field;
       field.first = elem.at("cost").get<int>();
       field.second = elem.at("name").get<std::string>();
       resp.suggestions.push_back(field);
@@ -73,20 +73,20 @@ std::string search_in_storage(std::string input, json data) {
   if (!check) {
     return "";
   }
-  std::sort(resp.suggestions.begin(),resp.suggestions.end());
+  std::sort(resp.suggestions.begin(), resp.suggestions.end());
   std::stringstream ss;
-  ss<< "{" << std::endl;
+  ss << "{" << std::endl;
   ss << "\"suggestions\": [" << std::endl;
-  for (size_t i = 0; i < resp.suggestions.size(); i ++) {
-    json jField = json{{"text",resp.suggestions[i].second},{"position",i}};
+  for (size_t i = 0; i < resp.suggestions.size(); i++) {
+    json jField = json{{"text", resp.suggestions[i].second}, {"position", i}};
     ss << jField;
-    if (i != resp.suggestions.size()-1) {
-      ss << ","<< std::endl;
+    if (i != resp.suggestions.size() - 1) {
+      ss << "," << std::endl;
     } else {
       ss << std::endl;
     }
   }
-  ss <<"]"<< std::endl;
+  ss << "]" << std::endl;
   ss << "}" << std::endl;
   return ss.str();
 }
@@ -119,7 +119,6 @@ void handle_request(http::request<Body, http::basic_fields<Allocator>>&& req,
       req.target().find("v1/api/suggest") == beast::string_view::npos)
     return send(bad_request("Данный путь не обрабатывается"));
 
-  //  TODO бизнеслогика
   http::response<http::string_body> res{http::status::ok, req.version()};
   res.set(http::field::content_type, "application/json");
   res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
@@ -129,10 +128,10 @@ void handle_request(http::request<Body, http::basic_fields<Allocator>>&& req,
   std::fstream file(PATH_TO_JSON);
   json data;
   file >> data;
-  std::string body = search_in_storage(input,data);
+  std::string body = search_in_storage(input, data);
   if (body == "") {
     bool exist = false;
-    for (size_t i=0;i < unhandled.size();i++) {
+    for (size_t i = 0; i < unhandled.size(); i++) {
       if (unhandled[i].text == input) {
         exist = true;
         unhandled[i].cost = unhandled[i].cost + 10;
@@ -145,11 +144,11 @@ void handle_request(http::request<Body, http::basic_fields<Allocator>>&& req,
       newF.text = input;
       unhandled.push_back(newF);
     }
-    auto end = std::chrono::high_resolution_clock::now();//****
-    std::chrono::duration<double> time = end - start;//****
+    auto end = std::chrono::high_resolution_clock::now();  //****
+    std::chrono::duration<double> time = end - start;      //****
     std::cout << time.count() << std::endl;
     if (time.count() > 10.0) {
-      start = std::chrono::high_resolution_clock::now();//****
+      start = std::chrono::high_resolution_clock::now();  //****
       update_information_in_storage(unhandled, PATH_TO_JSON);
     }
   }
@@ -219,10 +218,8 @@ void do_session(tcp::socket& socket) {
 
 //------------------------------------------------------------------------------
 
-auto example() -> void {
-  throw std::runtime_error("not implemented");
-}
-void go_useless_server(int argc, char* argv[]){
+auto example() -> void { throw std::runtime_error("not implemented"); }
+void go_useless_server(int argc, char* argv[]) {
   try {
     // Check command line arguments.
     if (argc != 4) {
