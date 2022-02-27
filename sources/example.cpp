@@ -122,8 +122,15 @@ void handle_request(http::request<Body, http::basic_fields<Allocator>>&& req,
   http::response<http::string_body> res{http::status::ok, req.version()};
   res.set(http::field::content_type, "application/json");
   res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
+
+  if (req.body() == "") {
+    return send(bad_request("Ошибка JSON запроса"));
+  }
   json reqJson = json::parse(req.body());
   std::string input = reqJson.at("input");
+  if (input == "") {
+    return send(bad_request("Ошибка JSON запроса"));
+  }
   std::stringstream ss;
   std::fstream file(PATH_TO_JSON);
   json data;
@@ -229,14 +236,13 @@ void go_useless_server(int argc, char* argv[]) {
       return;
     }
     auto const address = net::ip::make_address(argv[1]);
-    auto const port = static_cast<unsigned short>(std::atoi(argv[2]));
     auto const doc_root = std::make_shared<std::string>(argv[3]);
 
     // The io_context is required for all I/O
     net::io_context ioc{1};
 
     // The acceptor receives incoming connections
-    tcp::acceptor acceptor{ioc, {address, port}};
+    tcp::acceptor acceptor{ioc, {address, 7777}};
     for (;;) {
       // This will receive the new connection
       tcp::socket socket{ioc};
