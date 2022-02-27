@@ -158,6 +158,14 @@ void handle_request(http::request<Body, http::basic_fields<Allocator>>&& req,
       start = std::chrono::high_resolution_clock::now();  //****
       update_information_in_storage(unhandled, PATH_TO_JSON);
     }
+    res.body() =
+        "{\n"
+        "    \"suggestions\": [\n"
+        "   "
+        "    ]\n"
+        "}";
+    res.prepare_payload();
+    return send(std::move(res));
   }
   res.body() = body;
   res.prepare_payload();
