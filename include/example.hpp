@@ -23,6 +23,6 @@ namespace net = boost::asio;       // from <boost/asio.hpp>
 using tcp = boost::asio::ip::tcp;  // from <boost/asio/ip/tcp.hpp>
 auto example() -> void;
 
-void go_useless_server(int argc, char* argv[]);
+void go_useful_server(int argc, char* argv[]);
 
 #endif // INCLUDE_EXAMPLE_HPP_
